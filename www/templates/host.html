@@ -1,0 +1,21 @@
+<ion-view view-title="Host">
+  <ion-content>
+	<form name="loginForm" ng-submit="host()">
+		<div class="list">
+		  <label class="item item-input host-input">
+		    <input type="text" name="name" placeholder="Station Name" ng-model="hostLoginData.name">
+		  </label>
+		  <label class="item item-input host-input">
+		    <input type="password" name="pass" placeholder="Station Password" ng-model="hostLoginData.pass">
+		  </label>
+		  <label class="item item-input host-input">
+		    <input type="password" name="pass2" placeholder="Re-type Password" ng-model="hostLoginData.retypedPass">
+		  </label>
+		  <label class="item item-input host-input">
+		    <textarea name="desc" placeholder="Description" ng-model="hostLoginData.desc"></textarea>
+		  </label>
+		  <button class="button button-block button-positive" type="submit">Host!</button>
+		</div>
+	</form>
+  </ion-content>
+</ion-view>

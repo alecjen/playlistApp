@@ -1,0 +1,53 @@
+<ion-view view-title="Connect to a Host">
+<ion-content>
+
+  <div class="bar bar-header item-input-inset">
+  <label class="item-input-wrapper">
+    <i class="icon ion-ios-search placeholder-icon"></i>
+    <input type="search" placeholder="Search" ng-model="searchString">
+  </label>
+  <button class="button button-clear button-dark" ng-click="search(searchString); searchString = ''">
+    Search
+  </button>
+  </div>
+  <div class="list card" ng-if="searchResults.length > 0">
+	<div ng-repeat="song in searchResults" class="item item-icon-left" >
+		<i class="button button-clear button-small icon ion-plus-round" ng-click="addToPlaylist(song)"></i>
+	  {{song.title}}
+	</div>
+  </div>
+
+  <div class="list card" ng-if="playlist.length > 0">
+  	<div class="item item-divider">
+    Now Playing
+  	</div>
+	<div class="item">
+	  {{playlist[0].title}}
+	</div>
+  </div>
+
+
+  <div class="list card" ng-if="playlist.length > 0">
+  	<div class="item item-divider">
+    Up Next...
+  	</div>
+	<div ng-repeat="song in playlist" class="item" ng-if="$index > 0">
+	  {{song.title}}
+	</div>
+  </div>
+
+  <div class="card">
+    <div class="item item-text-wrap">
+      <div class="item-divider"><h1>SoundCloud</h1></div>
+      <div ng-repeat="song in playlist">
+      </ng-sc-track><ng-sc-track track="song.id"></ng-sc-track>
+  	  </div>
+    </div>
+    </div>
+  <div class="list card" ng-if="hosts.length > 0">
+	<a href="#" ng-repeat="host in hosts" class="item item-icon-left" >
+	  {{host.name}}
+	</a>
+  </div>
+</ion-content>
+</ion-view>

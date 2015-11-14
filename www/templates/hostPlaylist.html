@@ -1,0 +1,9 @@
+<ion-view view-title="{{stationName}}">
+<ion-content>
+	<div class="list card" ng-if="songs.length > 0">
+	<a href="#" ng-repeat="song in songs" class="item item-icon-left" >
+	  {{song}}
+	</a>
+  </div>
+</ion-content>
+</ion-view>
