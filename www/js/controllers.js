@@ -1,4 +1,4 @@
-angular.module('starter.controllers', [])
+angular.module('starter.controllers', ['firebase'])
 
 .controller('AppCtrl', function($scope, $ionicModal, $timeout, $ionicHistory) {
 
@@ -56,9 +56,12 @@ angular.module('starter.controllers', [])
   ];
 })
 
-.controller('HostCtrl', function($scope, $location, hostsService) {
+.controller('HomeCtrl', function($scope) {
+})
+
+.controller('HostCtrl', function($scope, $location, hostsService, Hosts) {
   $scope.hostLoginData = {};
-  $scope.hosts = [];
+  $scope.hosts = Hosts;
 
   $scope.host = function() {
     if($scope.hostLoginData.pass != $scope.hostLoginData.retypedPass) {
@@ -67,7 +70,12 @@ angular.module('starter.controllers', [])
       return;
     }
     hostsService.addHost($scope.hostLoginData);
-    $scope.hosts = hostsService.getHosts();
+    $scope.hosts.$add({
+      name: $scope.hostLoginData.name,
+      pass: $scope.hostLoginData.pass,
+      pass2: $scope.hostLoginData.retypedPass,
+      desc: $scope.hostLoginData.desc
+    });
     console.log($scope.hosts);
     var id = $scope.hostLoginData.name;
     $scope.hostLoginData = {};
@@ -75,25 +83,13 @@ angular.module('starter.controllers', [])
   }
 })
 
-.controller('HostPlayCtrl', function($scope, $stateParams, $ionicPlatform) {
+.controller('HostPlayCtrl', function($scope, $stateParams, $ionicPlatform, $firebaseArray, $http) {
   $scope.stationName = $stateParams.hostId;
-  $scope.songs = ["song1", "song2", "song3"];
-})
-
-.controller('ConnectCtrl', function($scope, $http, hostsService) {
-
-  $scope.$on('$ionicView.enter', function(e) {
-    $scope.hosts = hostsService.getHosts();
-    console.log($scope.hosts);
-  });
-
-  $scope.clear = function() {
-    $scope.searchString = "clear";
-  };
+  var ref = new Firebase("https://dazzling-fire-7990.firebaseio.com/" + $scope.stationName);
+  $scope.playlist = $firebaseArray(ref);
 
   $scope.searchResults = [];
-  $scope.playlist = [];
-  
+
   $scope.search = function(searchString) {
     var clientid = 'df9012da9800702acd7c621e45e30bdd';
     $http({
@@ -120,10 +116,22 @@ angular.module('starter.controllers', [])
   }
 
   $scope.addToPlaylist = function(song) {
-    $scope.playlist.push(song);
+    //$scope.playlist.push(song);
+    $scope.playlist.$add({
+      id: song.id,
+      title: song.title
+    });
     console.log(song.id);
     $scope.searchResults = [];
   };
+
+})
+
+.controller('ConnectCtrl', function($scope, $http, hostsService, Songs, Hosts) {
+  $scope.$on('$ionicView.enter', function(e) {
+    $scope.hosts = Hosts;
+    console.log($scope.hosts);
+  });
 })
 
 
