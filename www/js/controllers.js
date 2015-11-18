@@ -1,4 +1,4 @@
-angular.module('starter.controllers', ['firebase'])
+angular.module('starter.controllers', ['firebase', 'spotify'])
 
 .controller('AppCtrl', function($scope, $ionicModal, $timeout, $ionicHistory) {
 
@@ -57,6 +57,17 @@ angular.module('starter.controllers', ['firebase'])
 })
 
 .controller('HomeCtrl', function($scope) {
+  $scope.songs = [];
+  $scope.checkSongs = function(search) {
+    Spotify.search(search, 'track').then(function (data) {
+      //console.log(data.tracks.items);
+      data.tracks.items.forEach(function(item) {
+        console.log(item.name);
+        console.log(item.artists);
+      });
+    });
+  };
+
 })
 
 .controller('HostCtrl', function($scope, $location, hostsService, Hosts) {
@@ -83,14 +94,34 @@ angular.module('starter.controllers', ['firebase'])
   }
 })
 
-.controller('HostPlayCtrl', function($scope, $stateParams, $ionicPlatform, $firebaseArray, $http) {
+.controller('HostPlayCtrl', function($scope, $rootScope, $stateParams, $ionicPlatform, $firebaseArray, $http, Hosts) {
   $scope.stationName = $stateParams.hostId;
   var ref = new Firebase("https://dazzling-fire-7990.firebaseio.com/" + $scope.stationName);
   $scope.playlist = $firebaseArray(ref);
+  $scope.hosts = Hosts;
+
+  // Host Leaves the Station, i.e. terminate everything
+  $rootScope.$on('$locationChangeSuccess', function() {
+    console.log("changed location");
+    // Delete the playlist from the database
+    // angular.forEach($scope.playlist, function(song,key) {
+    //   $scope.playlist.$remove(song);
+    // });
+    // Remove the host station
+    // angular.forEach($scope.hosts, function(host,key) {
+    //   if(host.name == $scope.stationName) {
+    //     $scope.hosts.$remove(host);
+    //   }
+    // });
+  });   
 
   $scope.searchResults = [];
 
   $scope.search = function(searchString) {
+    $scope.searchResults = [];
+    if(searchString == "") {
+      return;
+    }
     var clientid = 'df9012da9800702acd7c621e45e30bdd';
     $http({
         method: 'GET',
@@ -98,10 +129,14 @@ angular.module('starter.controllers', ['firebase'])
     }).
     success(function(data) {
       data.forEach(function(song) {
-        var songData = {};
-        songData.title = song.title;
-        songData.id = song.id;
-        $scope.searchResults.push(songData);
+        if(song.streamable) {
+          var songData = {};
+          songData.title = song.title;
+          songData.id = song.id;
+          songData.user = song.user.username;
+          songData.permalink_url = song.permalink_url;
+          $scope.searchResults.push(songData);
+        }
       });
       //console.log($scope.searchResults.length);
       // $scope.band = data.user.username;
@@ -119,12 +154,21 @@ angular.module('starter.controllers', ['firebase'])
     //$scope.playlist.push(song);
     $scope.playlist.$add({
       id: song.id,
-      title: song.title
+      title: song.title,
+      user: song.user,
+      permalink_url: song.permalink_url
     });
-    console.log(song.id);
+    console.log(song.permalink_url);
     $scope.searchResults = [];
   };
 
+  $scope.removeSong = function(song) {
+    $scope.playlist.$remove(song);
+  };
+
+  $scope.playNextSong = function() {
+    $scope.playlist.$remove($scope.playlist[0]);
+  };
 })
 
 .controller('ConnectCtrl', function($scope, $http, hostsService, Songs, Hosts) {

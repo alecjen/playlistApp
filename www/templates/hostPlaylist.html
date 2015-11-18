@@ -11,8 +11,8 @@
 	</div>
 
 	<div class="list card" ng-if="searchResults.length > 0">
-		<div ng-repeat="song in searchResults" class="item item-icon-left" >
-			<i class="button button-clear button-small icon ion-plus-round" ng-click="addToPlaylist(song)"></i>
+		<div ng-repeat="song in searchResults" class="item item-icon-left" ng-click="addToPlaylist(song)">
+			<i class="button button-clear button-small icon ion-plus-round"></i>
 		  {{song.title}}
 		</div>
   	</div>
@@ -23,9 +23,16 @@
   	</div>
 	<div class="item item-icon-right">
 	  {{playlist[0].title}}
-	  <ng-sc-track track="playlist[0].id"></ng-sc-track>
+	  <div plangular="{{playlist[0].permalink_url}}">
+        <button ng-init="play()" ng-click="playPause()">Play/Pause</button>
+        <button ng-click="pause(); removeSong(playlist[0])">Delete</button>
+        <progress ng-click="seek($event)" ng-value="currentTime / duration || 0">
+    	  {{ currentTime / duration || 0 }}
+  	    </progress>
+  	    <div ng-if="(player.playing === track.src) && (currentTime == duration) && (duration > 0)" ng-init="pause(); removeSong(playlist[0])">hello</div>
 	  <!-- <i class="button button-clear button-small icon ion-plus-round"></i> -->
-	</div>
+	  </div>
+    </div>
   </div>
 
 
@@ -35,16 +42,11 @@
   	</div>
 	<div ng-repeat="song in playlist" class="item" ng-if="$index > 0">
 	  {{song.title}}
+	  <div plangular="{{song.permalink_url}}">
+        <button ng-click="playPause()">Play/Pause</button>
+        <button ng-click="pause(); removeSong(song)">Delete</button>
+      </div>
 	</div>
-  </div>
-
-  <div class="card">
-    <div class="item item-text-wrap">
-      <div class="item-divider"><h1>SoundCloud</h1></div>
-      <div ng-repeat="song in playlist">
-      <ng-sc-track track="song.id"></ng-sc-track>
-  	  </div>
-    </div>
   </div>
 
 </ion-content>
