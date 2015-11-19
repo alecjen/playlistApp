@@ -1,4 +1,4 @@
-angular.module('starter.controllers', ['firebase', 'spotify'])
+angular.module('starter.controllers', ['firebase'])
 
 .controller('AppCtrl', function($scope, $ionicModal, $timeout, $ionicHistory) {
 
@@ -134,6 +134,7 @@ angular.module('starter.controllers', ['firebase', 'spotify'])
           songData.title = song.title;
           songData.id = song.id;
           songData.user = song.user.username;
+          songData.stream_url = song.stream_url + '?client_id=' + clientid;
           songData.permalink_url = song.permalink_url;
           $scope.searchResults.push(songData);
         }
@@ -156,6 +157,7 @@ angular.module('starter.controllers', ['firebase', 'spotify'])
       id: song.id,
       title: song.title,
       user: song.user,
+      stream_url: song.stream_url,
       permalink_url: song.permalink_url
     });
     console.log(song.permalink_url);
@@ -166,8 +168,15 @@ angular.module('starter.controllers', ['firebase', 'spotify'])
     $scope.playlist.$remove(song);
   };
 
-  $scope.playNextSong = function() {
+  $scope.dbUpdated = false;
+  $scope.playNext = function() {
+    $scope.dbUpdated = false;
+    ref.on('child_removed', function() {
+      $scope.dbUpdated = true;
+    });
     $scope.playlist.$remove($scope.playlist[0]);
+    
+    //$scope.playlist.$remove($scope.playlist[0]);
   };
 })
 
@@ -180,5 +189,4 @@ angular.module('starter.controllers', ['firebase', 'spotify'])
 
 
 .controller('PlaylistCtrl', function($scope, $stateParams) {
-  console.log($stateParams.playlistId);
 });

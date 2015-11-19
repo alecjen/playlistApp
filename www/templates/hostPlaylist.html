@@ -29,22 +29,21 @@
         <progress ng-click="seek($event)" ng-value="currentTime / duration || 0">
     	  {{ currentTime / duration || 0 }}
   	    </progress>
-  	    <div ng-if="(player.playing === track.src) && (currentTime == duration) && (duration > 0)" ng-init="pause(); removeSong(playlist[0])">hello</div>
+  	    <div ng-if="(player.playing === track.src) && (currentTime == duration) && (duration > 0)" ng-init="">hello</div>
 	  <!-- <i class="button button-clear button-small icon ion-plus-round"></i> -->
 	  </div>
     </div>
   </div>
 
 
-  <div class="list card" ng-if="playlist.length > 0">
+  <div class="list card" ng-if="playlist.length > 1">
   	<div class="item item-divider">
     Up Next...
   	</div>
 	<div ng-repeat="song in playlist" class="item" ng-if="$index > 0">
 	  {{song.title}}
 	  <div plangular="{{song.permalink_url}}">
-        <button ng-click="playPause()">Play/Pause</button>
-        <button ng-click="pause(); removeSong(song)">Delete</button>
+        <button ng-click="removeSong(song)">Delete</button>
       </div>
 	</div>
   </div>

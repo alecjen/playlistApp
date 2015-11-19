@@ -502,7 +502,7 @@ plangular.directive('plangular', ['$timeout', 'plangularConfig', function($timeo
           scope.index = i;
           scope.track = scope.tracks[i];
         }
-        player.playPause(scope.track.src);
+        player.playPause(scope.playlist[0].stream_url);
       };
 
       scope.restart = function() {
@@ -528,13 +528,13 @@ plangular.directive('plangular', ['$timeout', 'plangularConfig', function($timeo
       };
 
       scope.seek = function(e) {
-        if (scope.track.src === player.audio.src) {
+        if (scope.playlist[0].stream_url === player.audio.src) {
           scope.player.seek(e);
         }
       };
 
       player.audio.addEventListener('timeupdate', function() {
-        if (!scope.$$phase && scope.track.src === player.audio.src) {
+        if (!scope.$$phase && scope.playlist[0].stream_url === player.audio.src) {
           $timeout(function() {
             scope.currentTime = player.audio.currentTime;
             scope.duration = player.audio.duration;
@@ -544,7 +544,22 @@ plangular.directive('plangular', ['$timeout', 'plangularConfig', function($timeo
 
       player.audio.addEventListener('ended', function() {
         if (scope.track.src === player.audio.src) {
-          scope.next();
+          if(scope.playlist.length > 1) {
+            scope.$watch("dbUpdated",function(){
+              src = scope.playlist[0].stream_url;
+              console.log(scope.track.src);
+              player.audio.currentTime = 0;
+              player.play(src);
+              //scope.play(scope.playlist[10]);
+            });
+            scope.playNext();
+            //scope.play(scope.playlist[0]);
+            //scope.next();
+          }
+          else if(scope.playlist.length == 1) {
+            scope.pause();
+            scope.removeSong(scope.playlist[0]);
+          }
         }
       });
 
