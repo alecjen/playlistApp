@@ -94,11 +94,13 @@ angular.module('starter.controllers', ['firebase'])
   }
 })
 
-.controller('HostPlayCtrl', function($scope, $rootScope, $stateParams, $ionicPlatform, $firebaseArray, $http, Hosts) {
+.controller('HostPlayCtrl', function($scope, $rootScope, $stateParams, $ionicPopover, $ionicPlatform, $firebaseArray, $http, Hosts) {
   $scope.stationName = $stateParams.hostId;
   var ref = new Firebase("https://dazzling-fire-7990.firebaseio.com/" + $scope.stationName);
   $scope.playlist = $firebaseArray(ref);
   $scope.hosts = Hosts;
+
+  $scope.listCanSwipe = true;
 
   // Host Leaves the Station, i.e. terminate everything
   $rootScope.$on('$locationChangeSuccess', function() {
@@ -125,7 +127,7 @@ angular.module('starter.controllers', ['firebase'])
     var clientid = 'df9012da9800702acd7c621e45e30bdd';
     $http({
         method: 'GET',
-        url: "http://api.soundcloud.com/tracks.json?client_id=" + clientid + "&q=" + searchString + "&limit=10"
+        url: "http://api.soundcloud.com/tracks.json?client_id=" + clientid + "&q=" + searchString + "&limit=25"
     }).
     success(function(data) {
       data.forEach(function(song) {
@@ -170,21 +172,82 @@ angular.module('starter.controllers', ['firebase'])
 
   $scope.dbUpdated = false;
   $scope.playNext = function() {
+    console.log('adf');
     $scope.dbUpdated = false;
     ref.on('child_removed', function() {
       $scope.dbUpdated = true;
     });
     $scope.playlist.$remove($scope.playlist[0]);
-    
     //$scope.playlist.$remove($scope.playlist[0]);
   };
+
+  $scope.getPlaying = function(playing) {
+    console.log(playing);
+  };
+
+  
+  $scope.openPopover = function($event) {
+    var template = '<ion-popover-view class="song-popover"><ion-content class="card">' + $scope.playlist[0].title + '</ion-content></ion-popover-view>';
+    $scope.popover = $ionicPopover.fromTemplate(template, {
+      scope: $scope
+    });
+    $scope.popover.show($event);
+  };
+
+  //Cleanup the popover when we're done with it!
+  $scope.$on('$destroy', function() {
+    $scope.popover.remove();
+  });
+  // Execute action on hide popover
+  $scope.$on('popover.hidden', function() {
+    // Execute action
+  });
+  // Execute action on remove popover
+  $scope.$on('popover.removed', function() {
+    // Execute action
+  });
+
 })
 
-.controller('ConnectCtrl', function($scope, $http, hostsService, Songs, Hosts) {
+.controller('ConnectCtrl', function($scope, $http, $location, $window, $ionicPopup, hostsService, Songs, Hosts) {
   $scope.$on('$ionicView.enter', function(e) {
     $scope.hosts = Hosts;
     console.log($scope.hosts);
   });
+
+  $scope.verify = function(host) {
+    var myPopup = $ionicPopup.show({
+    template: '<input type="password" ng-model="login.pw">',
+    title: 'Enter Station Password',
+    subTitle: 'Ask the Host for details',
+    scope: $scope,
+    buttons: [
+      { text: 'Cancel' },
+      {
+        text: '<b>Connect</b>',
+        type: 'button-positive',
+        onTap: function(e) {
+          if (!$scope.login.pw) {
+            //don't allow the user to close unless he enters wifi password
+            e.preventDefault();
+          } else {
+            return $scope.login.pw;
+          }
+        }
+      }
+    ]
+  });
+  myPopup.then(function(res) {
+    if($scope.login.pw == host.pass) {
+      $window.location.href = "#/app/host/" + host.name;
+    }
+    else {
+      alert('Incorrect Password! Try again');
+      $scope.login.pw = "";
+    }
+  });
+    
+  }
 })
 
 

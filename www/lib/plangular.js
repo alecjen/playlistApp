@@ -5,6 +5,7 @@ var audio = require('./lib/audio');
 module.exports = function() {
 
   this.playing = false;
+  this.isPlaying = false;
 
   this.audio = audio;
   //this.currentTime = audio.currentTime;
@@ -14,11 +15,13 @@ module.exports = function() {
     if (src != audio.src) { audio.src = src; }
     audio.play();
     this.playing = src;
+    this.isPlaying = true;
   }
 
   this.pause = function() {
     audio.pause();
     this.playing = false;
+    this.isPlaying = false;
   }
 
   this.playPause = function(src) {
@@ -27,6 +30,7 @@ module.exports = function() {
     } else {
       this.pause();
     }
+    this.isPlaying = !this.isPlaying;
   }
 
   this.restart = function() {
@@ -441,6 +445,7 @@ plangular.directive('plangular', ['$timeout', 'plangularConfig', function($timeo
       scope.index = 0;
       scope.playlist;
       scope.tracks = [];
+      scope.isPlaying;
 
       if (!client_id) {
         var message = [
@@ -490,10 +495,12 @@ plangular.directive('plangular', ['$timeout', 'plangularConfig', function($timeo
           scope.index = i;
           scope.track = scope.tracks[i];
         }
+        scope.isPlaying = true;
         player.play(scope.track.src);
       };
 
       scope.pause = function() {
+        scope.isPlaying = false;
         player.pause();
       };
 
@@ -503,6 +510,7 @@ plangular.directive('plangular', ['$timeout', 'plangularConfig', function($timeo
           scope.track = scope.tracks[i];
         }
         player.playPause(scope.playlist[0].stream_url);
+        scope.isPlaying = !scope.isPlaying;
       };
 
       scope.restart = function() {
@@ -562,6 +570,29 @@ plangular.directive('plangular', ['$timeout', 'plangularConfig', function($timeo
           }
         }
       });
+
+      scope.getPlaying = function() {
+        return scope.isPlaying;
+      }
+
+      scope.playNextSong = function() {
+        if(scope.playlist.length > 1) {
+          scope.$watch("dbUpdated",function(){
+            src = scope.playlist[0].stream_url;
+            console.log(scope.track.src);
+            player.audio.currentTime = 0;
+            player.play(src);
+            //scope.play(scope.playlist[10]);
+          });
+          scope.playNext();
+          //scope.play(scope.playlist[0]);
+          //scope.next();
+        }
+        else if(scope.playlist.length == 1) {
+          scope.pause();
+          scope.removeSong(scope.playlist[0]);
+        }    
+      }
 
     }
 
