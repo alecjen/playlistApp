@@ -1,5 +1,42 @@
-<ion-view view-title="Playlist">
+<ion-view view-title="{{stationName}}">
   <ion-content>
-    <h1>Playlist</h1>
-  </ion-content>
+    <ion-list class="card" ng-if="playlist.length > 0"  can-swipe="listCanSwipe">
+  	<div class="item item-divider">
+    Now Playing
+  	</div>
+	<ion-item class="item item-icon-right">
+	  <div plangular="{{playlist[0].permalink_url}}">
+	  	<div class="row">
+	  	<div class="col col-80 song-header" ng-click="openPopover($event)">{{playlist[0].title}}</div>
+
+	  	<i ng-if="!getPlaying()" ng-click="playPause(); getPlaying(playing)" class="button button-small icon ion-ios-play right-side col col-10"></i>
+	  	<i ng-if="getPlaying()" ng-click="playPause(); getPlaying(playing)" class="button button-small icon ion-ios-pause right-side col col-10"></i>
+
+	   </div>
+        <!-- <button ng-init="play()" ng-click="playPause()">Play/Pause</button> -->
+        <progress class="progress-bar" ng-click="seek($event)" ng-value="currentTime / duration || 0">
+    	  {{ currentTime / duration || 0 }}
+  	    </progress>
+  	    <ion-option-button class="button-assertive" ng-click="playNextSong()">
+          Remove
+      	</ion-option-button>
+	  </div>
+	  
+    </ion-item>
+  </ion-list>
+
+
+  <ion-list class="card" ng-if="playlist.length > 1">
+  	<div class="item item-divider">
+    Up Next...
+  	</div>
+	<ion-item ng-repeat="song in playlist" class="item" ng-if="$index > 0">
+	  {{song.title}}
+	  <ion-option-button class="button-assertive" ng-click="removeSong(song)">
+	    Remove
+	  </ion-option-button>
+	</ion-item>
+  </ion-list>
+
+</ion-content>
 </ion-view>
