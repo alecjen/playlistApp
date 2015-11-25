@@ -47,12 +47,12 @@ angular.module('starter.controllers', ['firebase'])
 
 .controller('PlaylistsCtrl', function($scope) {
   $scope.playlists = [
-    { title: 'Reggae', id: 1 },
-    { title: 'Chill', id: 2 },
-    { title: 'Dubstep', id: 3 },
-    { title: 'Indie', id: 4 },
-    { title: 'Rap', id: 5 },
-    { title: 'Cowbell', id: 6 }
+    { title: 'Alternative', id: 'Alternative' },
+    { title: 'Classical', id: 'Classical' },
+    { title: 'Electronic', id: 'Electronic' },
+    { title: 'Pop', id: 'Pop' },
+    { title: 'Rap', id: 'Rap' },
+    { title: 'Rock', id: 'Rock' }
   ];
 })
 
@@ -250,6 +250,91 @@ angular.module('starter.controllers', ['firebase'])
   }
 })
 
+.controller('PlaylistCtrl', function($scope, $stateParams, $firebaseArray, $http, $ionicPopover, $ionicPlatform) {
+	$scope.stationName = $stateParams.playlistId;
+	var ref = new Firebase("https://dazzling-fire-7990.firebaseio.com/" + $scope.stationName + "_pregenerated");
+	ref.remove();
+  	$scope.playlist = $firebaseArray(ref);
 
-.controller('PlaylistCtrl', function($scope, $stateParams) {
-});
+	$scope.listCanSwipe = true;
+
+	var listid;
+	if ($stateParams.playlistId == 'Alternative')
+		listid = '95467695';
+	if ($stateParams.playlistId == 'Classical')
+		listid = '53337986';
+	if ($stateParams.playlistId == 'Country')
+		listid = '4840907';
+	if ($stateParams.playlistId == 'Electronic')
+		listid = '101244339';
+	if ($stateParams.playlistId == 'Rap')
+		listid = '4192463';
+	if ($stateParams.playlistId == 'Pop')
+		listid = '69377943';
+	if ($stateParams.playlistId == 'Rock')
+		listid = '81173109';
+
+	var clientid = 'df9012da9800702acd7c621e45e30bdd';
+    $http({
+        method: 'GET',
+        url: "http://api.soundcloud.com/playlists/" + listid + "?client_id=" + clientid
+    }).
+    success(function(list) {
+	for (var i=0; i<list.tracks.length; i++)
+        	if(list.tracks[i].streamable) {
+			$scope.playlist.$add({
+      			id: list.tracks[i].id,
+      			title: list.tracks[i].title,
+      			user: list.tracks[i].user.username,
+      			stream_url: list.tracks[i].stream_url + '?client_id=' + clientid,
+      			permalink_url: list.tracks[i].permalink_url
+		});
+		}
+    		});
+
+$scope.removeSong = function(song) {
+    $scope.playlist.$remove(song);
+  };
+
+  $scope.dbUpdated = false;
+  $scope.playNext = function() {
+    console.log('adf');
+    $scope.dbUpdated = false;
+    ref.on('child_removed', function() {
+      $scope.dbUpdated = true;
+    });
+    $scope.playlist.$remove($scope.playlist[0]);
+    //$scope.playlist.$remove($scope.playlist[0]);
+  };
+
+  $scope.getPlaying = function(playing) {
+    console.log(playing);
+  };
+
+  
+  $scope.openPopover = function($event) {
+    var template = '<ion-popover-view class="song-popover"><ion-content class="card">' + $scope.playlist[0].title + '</ion-content></ion-popover-view>';
+    $scope.popover = $ionicPopover.fromTemplate(template, {
+      scope: $scope
+    });
+    $scope.popover.show($event);
+  };
+/*
+  //Cleanup the popover when we're done with it!
+  $scope.$on('$destroy', function() {
+    $scope.popover.remove();
+  });
+  // Execute action on hide popover
+  $scope.$on('popover.hidden', function() {
+    // Execute action
+  });
+  // Execute action on remove popover
+  $scope.$on('popover.removed', function() {
+    // Execute action
+  });
+*/
+
+})
+
+
+
